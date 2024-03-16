@@ -1,471 +1,181 @@
-/**********************************************************************************
- *
- * Interfacing Arduino with KS0108 Monochrome GLCD.
- * This example is for KS0108 GLCD modules with 128x64 Pixel resolution (two CS pins).
- * This is a free software with NO WARRANTY - Use it at your own risk!
- * https://simple-circuit.com/
- *
-***********************************************************************************
- Written by Limor Fried/Ladyada for Adafruit Industries,
- with contributions from the open source community.
- BSD license, check license.txt for more information
- All text above, and the splash screen below must be
- included in any redistribution.
-************************************************************************************
-* Modified to work with KS0108 monochrome GLCD. More information including circuit
-*   diagram on:
-* https://simple-circuit.com/
-*
- **********************************************************************************/
+/*
+Creato da @SuperMarioTerminator t.me Telegram
+per forum AlexGyver
 
-#include <Adafruit_GFX.h> // include adafruit GFX library
-#include <KS0108_GLCD.h>  // include KS0108 GLCD library
 
-// KS0108 GLCD library initialization according to the following connection:
-// KS0108_GLCD(DI, RW, E, DB0, DB1, DB2, DB3, DB4, DB5, DB6, DB7, CS1, CS2, RES);
-KS0108_GLCD display = KS0108_GLCD(8, 9, 10, A10, A9, A8, A7, A6, A5, A4, A3, A2, A1, A0);
 
-#define NUMFLAKES 15 // Number of snowflakes in the animation example
 
-#define LOGO_HEIGHT 16
-#define LOGO_WIDTH 16
-static const unsigned char PROGMEM logo_bmp[] =
-    {0b00000000, 0b11000000,
-     0b00000001, 0b11000000,
-     0b00000001, 0b11000000,
-     0b00000011, 0b11100000,
-     0b11110011, 0b11100000,
-     0b11111110, 0b11111000,
-     0b01111110, 0b11111111,
-     0b00110011, 0b10011111,
-     0b00011111, 0b11111100,
-     0b00001101, 0b01110000,
-     0b00011011, 0b10100000,
-     0b00111111, 0b11100000,
-     0b00111111, 0b11110000,
-     0b01111100, 0b11110000,
-     0b01110000, 0b01110000,
-     0b00000000, 0b00110000};
 
-void setup()
+*/
+
+
+#include <Arduino.h>
+//#include <SPI.h>
+#include <U8g2lib.h>
+#include <microDS18B20.h>
+#include <Wire.h>
+// Датчики на D2 и D3
+MicroDS18B20<1> sensor1;
+MicroDS18B20<2> sensor2;
+MicroDS18B20<3> sensor3;
+MicroDS18B20<4> sensor4;
+MicroDS18B20<5> sensor5;
+MicroDS18B20<6> sensor6;
+/* Constructor */
+U8G2_KS0108_128X64_F u8g2(U8G2_R0, A10, A9, A8, A7, A6, A5, A4, A3, /*enable=*/10, /*dc=*/8, /*cs0=*/A2, /*cs1=*/A1, /*cs2=*/U8X8_PIN_NONE, /* reset=*/A0); // Set R/W to low!
+/* u8g2.begin() is required and will sent the setup/init sequence to the display */
+void setup(void) 
 {
-  Serial.begin(9600);
-
-  // initialize KS0108 GLCD module with active high CS pins
-  if (display.begin(KS0108_CS_ACTIVE_HIGH) == false)
-  {
-    Serial.println(F("display initialization failed!")); // lack of RAM space
-    while (true)
-      ; // stay here forever!
-  }
-
-  display.display();
-  delay(2000); // Pause for 2 seconds
-
-  // Clear the buffer
-  display.clearDisplay();
-
-  // Draw a single pixel in white
-  display.drawPixel(10, 10, KS0108_ON);
-
-  // Show the display buffer on the screen. You MUST call display() after
-  // drawing commands to make them visible on screen!
-  display.display();
-  delay(2000);
-
-  // display.display() is NOT necessary after every single drawing command,
-  // unless that's what you want...rather, you can batch up a bunch of
-  // drawing operations and then update the screen all at once by calling
-  // display.display(). These examples demonstrate both approaches...
-
-  testdrawline(); // Draw many lines
-
-  testdrawrect(); // Draw rectangles (outlines)
-
-  testfillrect(); // Draw rectangles (filled)
-
-  testdrawcircle(); // Draw circles (outlines)
-
-  testfillcircle(); // Draw circles (filled)
-
-  testdrawroundrect(); // Draw rounded rectangles (outlines)
-
-  testfillroundrect(); // Draw rounded rectangles (filled)
-
-  testdrawtriangle(); // Draw triangles (outlines)
-
-  testfilltriangle(); // Draw triangles (filled)
-
-  testdrawchar(); // Draw characters of the default font
-
-  testdrawstyles(); // Draw 'stylized' characters
-
-  testscrolltext(); // Draw scrolling text
-
-  display.invertDisp(true);
-  display.display();
-  delay(1000);
-  display.invertDisp(false);
-  display.display();
-  delay(1000);
-
-  testdrawbitmap(); // Draw a small bitmap image
-
-  testanimate(logo_bmp, LOGO_WIDTH, LOGO_HEIGHT); // Animate bitmaps
+  digitalWrite( 9, LOW);
+  u8g2.begin();
+  //Serial.begin(9600);
 }
 
-// main loop (nothing here!)
-void loop()
+void loop(void)
 {
-}
-
-void testdrawline()
-{
-  int16_t i;
-
-  display.clearDisplay(); // Clear display buffer
-
-  for (i = 0; i < display.width(); i += 4)
+  
+  static uint32_t tmr;
+  if (millis() - tmr >= 800)
   {
-    display.drawLine(0, 0, i, display.height() - 1, KS0108_ON);
-    display.display(); // Update screen with each newly-drawn line
-    delay(1);
-  }
-  for (i = 0; i < display.height(); i += 4)
-  {
-    display.drawLine(0, 0, display.width() - 1, i, KS0108_ON);
-    display.display();
-    delay(1);
-  }
-  delay(250);
+    tmr = millis();
 
-  display.clearDisplay();
-
-  for (i = 0; i < display.width(); i += 4)
-  {
-    display.drawLine(0, display.height() - 1, i, 0, KS0108_ON);
-    display.display();
-    delay(1);
-  }
-  for (i = display.height() - 1; i >= 0; i -= 4)
-  {
-    display.drawLine(0, display.height() - 1, display.width() - 1, i, KS0108_ON);
-    display.display();
-    delay(1);
-  }
-  delay(250);
-
-  display.clearDisplay();
-
-  for (i = display.width() - 1; i >= 0; i -= 4)
-  {
-    display.drawLine(display.width() - 1, display.height() - 1, i, 0, KS0108_ON);
-    display.display();
-    delay(1);
-  }
-  for (i = display.height() - 1; i >= 0; i -= 4)
-  {
-    display.drawLine(display.width() - 1, display.height() - 1, 0, i, KS0108_ON);
-    display.display();
-    delay(1);
-  }
-  delay(250);
-
-  display.clearDisplay();
-
-  for (i = 0; i < display.height(); i += 4)
-  {
-    display.drawLine(display.width() - 1, 0, 0, i, KS0108_ON);
-    display.display();
-    delay(1);
-  }
-  for (i = 0; i < display.width(); i += 4)
-  {
-    display.drawLine(display.width() - 1, 0, i, display.height() - 1, KS0108_ON);
-    display.display();
-    delay(1);
-  }
-
-  delay(2000); // Pause for 2 seconds
-}
-
-void testdrawrect(void)
-{
-  display.clearDisplay();
-
-  for (int16_t i = 0; i < display.height() / 2; i += 2)
-  {
-    display.drawRect(i, i, display.width() - 2 * i, display.height() - 2 * i, KS0108_ON);
-    display.display(); // Update screen with each newly-drawn rectangle
-    delay(1);
-  }
-
-  delay(2000);
-}
-
-void testfillrect(void)
-{
-  display.clearDisplay();
-
-  for (int16_t i = 0; i < display.height() / 2; i += 3)
-  {
-    // The INVERSE color is used so rectangles alternate white/KS0108_ON
-    display.fillRect(i, i, display.width() - i * 2, display.height() - i * 2, KS0108_INVERSE);
-    display.display(); // Update screen with each newly-drawn rectangle
-    delay(1);
-  }
-
-  delay(2000);
-}
-
-void testdrawcircle(void)
-{
-  display.clearDisplay();
-
-  for (int16_t i = 0; i < max(display.width(), display.height()) / 2; i += 2)
-  {
-    display.drawCircle(display.width() / 2, display.height() / 2, i, KS0108_ON);
-    display.display();
-    delay(1);
-  }
-
-  delay(2000);
-}
-
-void testfillcircle(void)
-{
-  display.clearDisplay();
-
-  for (int16_t i = max(display.width(), display.height()) / 2; i > 0; i -= 3)
-  {
-    // The INVERSE color is used so circles alternate white/black
-    display.fillCircle(display.width() / 2, display.height() / 2, i, KS0108_INVERSE);
-    display.display(); // Update screen with each newly-drawn circle
-    delay(1);
-  }
-
-  delay(2000);
-}
-
-void testdrawroundrect(void)
-{
-  display.clearDisplay();
-
-  for (int16_t i = 0; i < display.height() / 2 - 2; i += 2)
-  {
-    display.drawRoundRect(i, i, display.width() - 2 * i, display.height() - 2 * i,
-                          display.height() / 4, KS0108_ON);
-    display.display();
-    delay(1);
-  }
-
-  delay(2000);
-}
-
-void testfillroundrect(void)
-{
-  display.clearDisplay();
-
-  for (int16_t i = 0; i < display.height() / 2 - 2; i += 2)
-  {
-    // The INVERSE color is used so round-rects alternate white/KS0108_ON
-    display.fillRoundRect(i, i, display.width() - 2 * i, display.height() - 2 * i,
-                          display.height() / 4, KS0108_INVERSE);
-    display.display();
-    delay(1);
-  }
-
-  delay(2000);
-}
-
-void testdrawtriangle(void)
-{
-  display.clearDisplay();
-
-  for (int16_t i = 0; i < max(display.width(), display.height()) / 2; i += 5)
-  {
-    display.drawTriangle(
-        display.width() / 2, display.height() / 2 - i,
-        display.width() / 2 - i, display.height() / 2 + i,
-        display.width() / 2 + i, display.height() / 2 + i, KS0108_ON);
-    display.display();
-    delay(1);
-  }
-
-  delay(2000);
-}
-
-void testfilltriangle(void)
-{
-  display.clearDisplay();
-
-  for (int16_t i = max(display.width(), display.height()) / 2; i > 0; i -= 5)
-  {
-    // The INVERSE color is used so triangles alternate white/black
-    display.fillTriangle(
-        display.width() / 2, display.height() / 2 - i,
-        display.width() / 2 - i, display.height() / 2 + i,
-        display.width() / 2 + i, display.height() / 2 + i, KS0108_INVERSE);
-    display.display();
-    delay(1);
-  }
-
-  delay(2000);
-}
-
-void testdrawchar(void)
-{
-  display.clearDisplay();
-
-  display.setTextSize(1);          // Normal 1:1 pixel scale
-  display.setTextColor(KS0108_ON); // Draw white text
-  display.setCursor(0, 0);         // Start at top-left corner
-  display.cp437(true);             // Use full 256 char 'Code Page 437' font
-
-  // Not all the characters will fit on the display. This is normal.
-  // Library will draw what it can and the rest will be clipped.
-  for (int16_t i = 0; i < 256; i++)
-  {
-    if (i == '\n')
-      display.write(' ');
-    else
-      display.write(i);
-  }
-
-  display.display();
-  delay(2000);
-}
-
-void testdrawstyles(void)
-{
-  display.clearDisplay();
-
-  display.setTextSize(1);          // Normal 1:1 pixel scale
-  display.setTextColor(KS0108_ON); // Draw white text
-  display.setCursor(0, 0);         // Start at top-left corner
-  display.println(F("Hello, world!"));
-
-  display.setTextColor(KS0108_OFF, KS0108_ON); // Draw 'inverse' text
-  display.println(3.141592);
-
-  display.setTextSize(2); // Draw 2X-scale text
-  display.setTextColor(KS0108_ON);
-  display.print(F("0x"));
-  display.println(0xDEADBEEF, HEX);
-
-  display.display();
-  delay(2000);
-}
-
-void testscrolltext(void)
-{
-  display.clearDisplay();
-
-  display.setTextSize(2); // Draw 2X-scale text
-  display.setTextColor(KS0108_ON);
-  display.setCursor(10, 0);
-  display.println(F("scroll"));
-  display.display(); // Show initial text
-  delay(1000);
-
-  // Scroll in various directions, pausing in-between:
-  // scroll right
-  for (uint8_t scroll = 0; scroll < 0x0F; scroll++)
-  {
-    display.scrollRight(1);
-    display.display();
-    delay(10);
-  }
-  delay(1000);
-  // scroll left
-  for (uint8_t scroll = 0; scroll < 0x0F; scroll++)
-  {
-    display.scrollLeft(1);
-    display.display();
-    delay(10);
-  }
-  delay(1000);
-  // diagonal scroll right-up
-  for (uint8_t scroll = 0; scroll < display.height() / 2; scroll++)
-  {
-    display.scrollRight(1);
-    display.scrollUp(1);
-    display.display();
-    delay(10);
-  }
-  delay(1000);
-  // diagonal scroll left-up
-  for (uint8_t scroll = 0; scroll < display.height() / 2; scroll++)
-  {
-    display.scrollLeft(1);
-    display.scrollUp(1);
-    display.display();
-    delay(10);
-  }
-  delay(1000);
-}
-
-void testdrawbitmap(void)
-{
-  display.clearDisplay();
-
-  display.drawBitmap(
-      (display.width() - LOGO_WIDTH) / 2,
-      (display.height() - LOGO_HEIGHT) / 2,
-      logo_bmp, LOGO_WIDTH, LOGO_HEIGHT, 1);
-  display.display();
-  delay(1000);
-}
-
-#define XPOS 0 // Indexes into the 'icons' array in function below
-#define YPOS 1
-#define DELTAY 2
-
-void testanimate(const uint8_t *bitmap, uint8_t w, uint8_t h)
-{
-  int8_t f, icons[NUMFLAKES][3];
-
-  // Initialize 'snowflake' positions
-  for (f = 0; f < NUMFLAKES; f++)
-  {
-    icons[f][XPOS] = random(1 - LOGO_WIDTH, display.width());
-    icons[f][YPOS] = -LOGO_HEIGHT;
-    icons[f][DELTAY] = random(1, 6);
-    Serial.print(F("x: "));
-    Serial.print(icons[f][XPOS], DEC);
-    Serial.print(F(" y: "));
-    Serial.print(icons[f][YPOS], DEC);
-    Serial.print(F(" dy: "));
-    Serial.println(icons[f][DELTAY], DEC);
-  }
-
-  for (;;)
-  {                         // Loop forever...
-    display.clearDisplay(); // Clear the display buffer
-
-    // Draw each snowflake:
-    for (f = 0; f < NUMFLAKES; f++)
+    // читаем прошлое значение
+    if (sensor1.readTemp())
     {
-      display.drawBitmap(icons[f][XPOS], icons[f][YPOS], bitmap, w, h, KS0108_ON);
+
     }
+      //Serial.println(sensor1.getTemp());
+    else{
 
-    display.display(); // Show the display buffer on the screen
-    delay(200);        // Pause for 1/10 second
+    }
+      //Serial.println("error");
 
-    // Then update coordinates of each flake...
-    for (f = 0; f < NUMFLAKES; f++)
+    // запрашиваем новое измерение
+    sensor1.requestTemp();
+    if (sensor2.readTemp())
     {
-      icons[f][YPOS] += icons[f][DELTAY];
-      // If snowflake is off the bottom of the screen...
-      if (icons[f][YPOS] >= display.height())
-      {
-        // Reinitialize to a random position, just off the top
-        icons[f][XPOS] = random(1 - LOGO_WIDTH, display.width());
-        icons[f][YPOS] = -LOGO_HEIGHT;
-        icons[f][DELTAY] = random(1, 6);
-      }
-    }
-  }
-}
 
-// end of code.
+    }
+      //Serial.println(sensor2.getTemp());
+    else{
+
+    }
+      //Serial.println("error");
+
+    // запрашиваем новое измерение
+    sensor2.requestTemp();
+    if (sensor3.readTemp())
+    {
+
+    }
+     // Serial.println(sensor3.getTemp());
+    else{
+
+    }
+     // Serial.println("error");
+
+    // запрашиваем новое измерение
+    sensor3.requestTemp();
+    if (sensor4.readTemp())
+    {
+
+    }
+     // Serial.println(sensor4.getTemp());
+    else{
+
+    }
+     // Serial.println("error");
+
+    // запрашиваем новое измерение
+    sensor4.requestTemp();
+    if (sensor5.readTemp())
+    {
+
+    }
+    //  Serial.println(sensor5.getTemp());
+    else{
+
+    }
+     // Serial.println("error");
+
+    // запрашиваем новое измерение
+    sensor5.requestTemp();
+    if (sensor6.readTemp())
+    {
+
+    }
+     // Serial.println(sensor6.getTemp());
+     else {
+
+     };
+     // Serial.println("error");
+
+    // запрашиваем новое измерение
+    sensor6.requestTemp();
+  }
+  
+
+
+  u8g2.clearBuffer();
+  
+
+  u8g2.setFont(u8g2_font_resoledbold_tr);
+  u8g2.drawStr(2, 12, "Sea");
+  char buffer[15]; // Буфер для хранения строки
+
+  // Преобразование float в строку
+  dtostrf(sensor1.getTemp(), 4, 1, buffer);
+
+  const char *temp1 = buffer;
+  u8g2.setFont(u8g2_font_haxrcorp4089_tn);
+  u8g2.drawStr(38, 12, temp1);
+  // Преобразование float в строку
+  dtostrf(sensor4.getTemp(), 4, 1, buffer);
+
+  const char *temp4 = buffer;
+
+  u8g2.drawStr(88, 12, temp4);
+  u8g2.setFont(u8g2_font_resoledbold_tr);
+  u8g2.drawStr(2, 38, "Cool");
+  
+
+  // Преобразование float в строку
+  dtostrf(sensor2.getTemp(), 4, 1,  buffer);
+  u8g2.setFont(u8g2_font_haxrcorp4089_tn);
+  const char *temp2 = buffer;
+
+  u8g2.drawStr(38, 38, temp2);
+  // Преобразование float в строку
+  dtostrf(sensor5.getTemp(), 4, 1, buffer);
+
+  const char *temp5 = buffer;
+  
+  u8g2.drawStr(88, 38, temp5);
+  u8g2.setFont(u8g2_font_resoledbold_tr);
+  u8g2.drawStr(2, 62, "Oil");
+
+  u8g2.setFont(u8g2_font_haxrcorp4089_tn);
+  // Преобразование float в строку
+  dtostrf(sensor3.getTemp(), 4, 1, buffer);
+
+  const char *temp3 = buffer;
+
+  u8g2.drawStr(38, 62, temp3);
+  
+  // Преобразование float в строку
+  dtostrf(sensor6.getTemp(), 4, 1, buffer);
+
+  const char *temp6 = buffer;
+
+  u8g2.drawStr(88, 62, temp6);
+  u8g2.setFont(u8g2_font_6x12_t_symbols);
+
+  u8g2.drawGlyph(115,62,8451); /* dec 9731/hex 2603 Snowman */
+  u8g2.drawGlyph(65, 62, 8451); /* dec 9731/hex 2603 Snowman */
+  u8g2.drawGlyph(115, 38, 8451); /* dec 9731/hex 2603 Snowman */
+  u8g2.drawGlyph(65, 38, 8451);   /* dec 9731/hex 2603 Snowman */
+  u8g2.drawGlyph(115, 12, 8451); /* dec 9731/hex 2603 Snowman */
+  u8g2.drawGlyph(65, 12, 8451);  /* dec 9731/hex 2603 Snowman */
+  u8g2.sendBuffer();
+  delay(100);
+}
