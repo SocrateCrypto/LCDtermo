@@ -21,6 +21,7 @@ MicroDS18B20<3> sensor3;
 MicroDS18B20<4> sensor4;
 MicroDS18B20<5> sensor5;
 MicroDS18B20<6> sensor6;
+  char *hzz;
 /* Constructor */
 U8G2_KS0108_128X64_F u8g2(U8G2_R0, A10, A9, A8, A7, A6, A5, A4, A3, /*enable=*/10, /*dc=*/8, /*cs0=*/A2, /*cs1=*/A1, /*cs2=*/U8X8_PIN_NONE, /* reset=*/A0); // Set R/W to low!
 /* u8g2.begin() is required and will sent the setup/init sequence to the display */
@@ -34,6 +35,33 @@ void setup(void)
 void loop(void)
 {
   
+  u8g2.clearBuffer();
+  static uint32_t hz;
+  static uint32_t period;
+  if (millis() - period >= 1000)
+  {
+
+    static char buffer[15]; // Буфер для хранения строки
+
+    // Преобразование float в строку
+    dtostrf(hz, 4, 1, buffer);
+
+     hzz = buffer;
+    u8g2.setFont(u8g2_font_resoledbold_tr);
+    //u8g2.drawStr(2, 25, "Hz");
+    
+
+    hz = 0;
+    period = millis();
+
+  }else{
+
+    hz++;
+  }
+  u8g2.setFont(u8g2_font_resoledbold_tr);
+  u8g2.drawStr(2, 25, "Hz");
+  u8g2.drawStr(38, 25, hzz);
+
   static uint32_t tmr;
   if (millis() - tmr >= 800)
   {
@@ -42,9 +70,8 @@ void loop(void)
     // читаем прошлое значение
     if (sensor1.readTemp())
     {
-
     }
-      //Serial.println(sensor1.getTemp());
+    // Serial.println(sensor1.getTemp());
     else{
 
     }
@@ -116,7 +143,7 @@ void loop(void)
   
 
 
-  u8g2.clearBuffer();
+  
   
 
   u8g2.setFont(u8g2_font_resoledbold_tr);
@@ -177,5 +204,4 @@ void loop(void)
   u8g2.drawGlyph(115, 12, 8451); /* dec 9731/hex 2603 Snowman */
   u8g2.drawGlyph(65, 12, 8451);  /* dec 9731/hex 2603 Snowman */
   u8g2.sendBuffer();
-  delay(100);
-}
+  }
