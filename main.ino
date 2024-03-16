@@ -1,8 +1,5 @@
 /*
-Creato da @SuperMarioTerminator t.me Telegram
-per forum AlexGyver
-
-
+Creato da
 
 
 
