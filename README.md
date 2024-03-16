@@ -8,20 +8,23 @@ RG12864A is a graphic LCD display module with resolution 128x64. This OLED modul
 
 
 
-17   /RST    ->A0 arduino Mega pin
-16   CSB     ->A1
-15   CSA       A2
-14   DB7       A3
-13   DB6       A4
-12   DB5       A5
-11   DB4       A6
-10   DB3       A7
-9    DB2       A8
-8    DB1       A9
-7    DB0       A10
-6    E         10
-5    R/W        GND
-4    RS(D/I)    8
+| Pin  | Signal   | Arduino Mega Pin |
+|------|----------|------------------|
+| 17   | /RST     | A0               |
+| 16   | CSB      | A1               |
+| 15   | CSA      | A2               |
+| 14   | DB7      | A3               |
+| 13   | DB6      | A4               |
+| 12   | DB5      | A5               |
+| 11   | DB4      | A6               |
+| 10   | DB3      | A7               |
+| 9    | DB2      | A8               |
+| 8    | DB1      | A9               |
+| 7    | DB0      | A10              |
+| 6    | E        | 10               |
+| 5    | R/W      | GND              |
+| 4    | RS(D/I)  | 8                |
+
 
 
 
