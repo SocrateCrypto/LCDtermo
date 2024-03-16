@@ -18,4 +18,8 @@ RG12864A is a graphic LCD display module with resolution 128x64. This OLED modul
 6    E         10
 5    R/W        GND
 4    RS(D/I)    8
+
+
+
+
 ![image](https://github.com/SocrateCrypto/LCDtermo/assets/80717919/e5b0054d-9b10-430a-9c1e-e1656438b199)
