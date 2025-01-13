@@ -1,7 +1,7 @@
 /*
 Creato da
 
-
+Anthony
 
 */
 
@@ -26,7 +26,7 @@ void setup(void)
 {
   digitalWrite( 9, LOW);
   u8g2.begin();
-  //Serial.begin(9600);
+  
 }
 
 void loop(void)
